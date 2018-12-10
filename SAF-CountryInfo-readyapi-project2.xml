@@ -4612,6 +4612,7 @@
       <con:settings>
         <con:setting id="34dc9d71-d4f2-4c79-ae06-a69a86f5b7d4fileName">ListOfCountryNamesByCode-TestCase</con:setting>
       </con:settings>
+      <con:savedRecentRuns>1</con:savedRecentRuns>
       <con:testStep type="request" id="e7318f01-d746-4660-a7e0-fd4eeda84ebb" name="ListOfCountryNamesByCode">
         <con:settings/>
         <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -4983,7 +4984,7 @@
           </con:request>
         </con:config>
       </con:testStep>
-      <con:testStep type="groovy" name="Groovy Script" id="b80c7f02-5258-4085-8cf2-4d1606b5571e">
+      <con:testStep type="groovy" name="Groovy Script XML TAGS" id="b80c7f02-5258-4085-8cf2-4d1606b5571e">
         <con:settings/>
         <con:config>
           <script>import com.eviware.soapui.support.GroovyUtils
@@ -4991,26 +4992,60 @@
 def groovyUtils = new com.eviware.soapui.support.GroovyUtils ( context )
 def holder = groovyUtils.getXmlHolder("ListOfLanguagesByCode#Response")
 
-holder.namespaces ["ns1"] = "http://www.oorsprong.org/websamples.countryinfo "
+holder.namespaces ["ns1"] = "http://www.oorsprong.org/websamples.countryinfo"
 
-//for (item in holder.getNodeValues("//item"))
-
-
-//def nodeValueResps = holder.getNodeValues("//ns1:ListOfLanguagesByCodeResponse[1]")
-
-def nodeValueResps = holder.getNodeValue("//ns1:ListOfLanguagesByCodeResponse[1]/ns1:ListOfLanguagesByCodeResult[1]/ns1:tLanguage[1]/ns1:sName[1]"}
-
-//m:ListOfLanguagesByCodeResponse[1]/m:ListOfLanguagesByCodeResult[1]/m:tLanguage[1]/m:sName[1]
+def nodeValueResps = holder.getNodeValues("//ns1:ListOfLanguagesByCodeResponse[1]/ns1:ListOfLanguagesByCodeResult[1]")
 
 if (nodeValueResps == null)
 	{
 	log.error "List of languages by code has a null values response"
 	}
 else
-	{	
+	{
+	// Check how to loop up a node level and just get the two child nodes in same loop
+	//for (item in holder.getNodeValues("//ns1:tLanguage"))
+			
 	// Loop through the response to check is as expected
-	log.info "Response returned " + nodeValueResps.	
+	for (item in holder.getNodeValues("//ns1:tLanguage/ns1:sName"))
+		log.info "Response returned for language name: [$item]"
+			
+	for (item in holder.getNodeValues("//ns1:tLanguage/ns1:sISOCode"))	
+		log.info "Response returned for ISO code: [$item]"		
 	}</script>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="groovy" name="Groovy Script XMLSlurper" id="9acbe7ce-9ec8-4a79-818b-2f8ea575f9f7">
+        <con:settings/>
+        <con:config>
+          <script>import com.eviware.soapui.support.GroovyUtils
+
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils (context)
+
+def holder = groovyUtils.getXmlHolder("ListOfLanguagesByCode#Response")
+
+//def languages = new XmlSlurper().parseText(holder.xml.toString())
+
+//languages.tLanguage.each
+//{
+//	log.info "slurper file returned: {$it.@sISOCode}"
+
+//	log.info "Response returned: {$it.@sISOCode}"
+	
+	//println "${it.@sISOCode} iSOCode"
+	//println "${it.@sName} iName"
+  	//it.Song.each
+//}
+
+doc = new XmlSlurper().parseText(holder.xml.toString())
+def languages = doc.Body.ListOfLanguagesByCodeResponse.ListOfLanguagesByCodeResult.tLanguage
+for(language in languages)
+{
+            testRunner.testCase.setPropertyValue("sISOCode",language.sISOCode.toString())
+            log.info (testRunner.testCase.getPropertyValue("sISOCode")) 
+            testRunner.testCase.setPropertyValue("sName",language.sName.toString())
+            log.info (testRunner.testCase.getPropertyValue("sName"))
+            testRunner.runTestStepByName("Verify individual language code")
+}</script>
         </con:config>
       </con:testStep>
       <con:loadTest id="c61e64c4-893f-4a1b-bc72-99b8b2e97069" name="LoadTest ListOfLanguagesByCode">
@@ -5032,7 +5067,16 @@ else
         <con:strategyInterval>500</con:strategyInterval>
         <con:reportParameters/>
       </con:loadTest>
-      <con:properties/>
+      <con:properties>
+        <con:property>
+          <con:name>sISOCode</con:name>
+          <con:value>zun</con:value>
+        </con:property>
+        <con:property>
+          <con:name>sName</con:name>
+          <con:value>Zuni</con:value>
+        </con:property>
+      </con:properties>
       <con:reportParameters/>
       <con:breakPoints>
         <con:testStepId>b80c7f02-5258-4085-8cf2-4d1606b5571e</con:testStepId>
@@ -5052,26 +5096,31 @@ else
       <con:settings>
         <con:setting id="366ab99c-dbc8-42ce-94aa-97146a1562e4fileName">ListOfLanguagesByName-TestCase</con:setting>
       </con:settings>
+      <con:savedRecentRuns>1</con:savedRecentRuns>
       <con:testStep type="request" id="4d56f5d5-3535-44f9-8279-e52cedcef86c" name="ListOfLanguagesByName">
         <con:settings/>
         <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
           <con:interface>CountryInfoServiceSoapBinding12</con:interface>
           <con:operation>ListOfLanguagesByName</con:operation>
           <con:request name="ListOfLanguagesByName" id="19905d67-b808-475a-9b5a-b27982c117c0">
-            <con:settings/>
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            </con:settings>
             <con:encoding>UTF-8</con:encoding>
             <con:endpoint>http://localhost:8090/</con:endpoint>
-            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:web="http://www.oorsprong.org/websamples.countryinfo">\r
-   <soap:Header/>\r
-   <soap:Body>\r
-      <web:ListOfLanguagesByName/>\r
-   </soap:Body>\r
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:web="http://www.oorsprong.org/websamples.countryinfo">
+   <soap:Header/>
+   <soap:Body>
+      <web:ListOfLanguagesByName/>
+   </soap:Body>
 </soap:Envelope>]]></con:request>
             <con:credentials>
               <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
               <con:authType>No Authorization</con:authType>
             </con:credentials>
-            <con:wsaConfig action="http://www.oorsprong.org/websamples.countryinfo/CountryInfoServiceSoapType/ListOfLanguagesByNameRequest"/>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:wsaConfig action="http://www.oorsprong.org/websamples.countryinfo/CountryInfoServiceSoapType/ListOfLanguagesByNameRequest" mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
             <con:environmentSpec>
               <con:entry environmentId="ed3ef71a-6da0-4bd5-acff-8a3c0646f1de">
                 <con:authProfile>Inherit From Parent</con:authProfile>
