@@ -4808,6 +4808,7 @@
       <con:settings>
         <con:setting id="a72985b6-c4cf-49c6-8504-5205d897b5b0fileName">ListOfCurrenciesByCode-TestCase</con:setting>
       </con:settings>
+      <con:savedRecentRuns>1</con:savedRecentRuns>
       <con:testStep type="request" id="0b5ef00c-e9ba-4691-b367-1becdd790cd4" name="ListOfCurrenciesByCode">
         <con:settings/>
         <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -5038,6 +5039,15 @@ def holder = groovyUtils.getXmlHolder("ListOfLanguagesByCode#Response")
 
 doc = new XmlSlurper().parseText(holder.xml.toString())
 def languages = doc.Body.ListOfLanguagesByCodeResponse.ListOfLanguagesByCodeResult.tLanguage
+
+// Logic to loop through each xml name &amp; attribute - note this does not work due to needing
+// to drill down to child nodes
+/*doc.depthFirst().each {   
+		atts = it.attributes().size() > 0 ? it.name() + " = " + 
+		        it.attributes() : null
+		                //if (atts) log.info atts
+		                log.info atts
+					}*/
 for(language in languages)
 {
             testRunner.testCase.setPropertyValue("sISOCode",language.sISOCode.toString())
@@ -5045,6 +5055,11 @@ for(language in languages)
             testRunner.testCase.setPropertyValue("sName",language.sName.toString())
             log.info (testRunner.testCase.getPropertyValue("sName"))
             testRunner.runTestStepByName("Verify individual language code")
+
+		  // XmlSluper use object with dot notation to obtain child nodes 
+            /* 
+            doc.children().children().children().children().children().each { log.info it.name() }
+            doc.children().children().children().children().children().each { log.info it.attributes() }*/
 }</script>
         </con:config>
       </con:testStep>
